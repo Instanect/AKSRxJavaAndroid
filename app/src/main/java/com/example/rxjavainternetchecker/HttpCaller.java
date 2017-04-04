@@ -15,6 +15,9 @@ import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
 import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -53,7 +56,25 @@ public class HttpCaller {
 
     }
 
-    private String getData() throws ExecutionException, InterruptedException {
+    public Observable<String> getObservableNext() {
+
+        return Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> e) throws Exception {
+                try {
+                    String data = getData();
+                    e.onNext(data);
+                    e.onComplete();
+                } catch (ExecutionException | InterruptedException exception) {
+                    exception.printStackTrace();
+                    e.onError(exception);
+                }
+            }
+        });
+
+    }
+
+    public String getData() throws ExecutionException, InterruptedException {
 
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = "http://www.google.com";
